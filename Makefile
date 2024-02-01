@@ -6,14 +6,11 @@
 # Use `make clean` to remove Gramine-generated files
 
 ################################# CONSTANTS ###################################
-# directory with arch-specific libraries, used by Redis
-# the below path works for Debian/Ubuntu; for CentOS/RHEL/Fedora, you should
-# overwrite this default like this: `ARCH_LIBDIR=/lib64 make`
+# directory with arch-specific libraries the below path works for Debian/Ubuntu; 
+# for CentOS/RHEL/Fedora, you should overwrite this default like this: `ARCH_LIBDIR=/lib64 make`
 
 ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)						# directory dove dovrebbero essere le librerie usate dall'app 
 
-#SRCDIR = ../../../SlicerRT/build/inner-build	
-#/home/fitnesslab/Desktop/SlicerRT/build/inner-build		# source directory dell'app
 
 ifeq ($(DEBUG),1)
 GRAMINE_LOG_LEVEL = debug
@@ -22,16 +19,16 @@ GRAMINE_LOG_LEVEL = error
 endif
 
 .PHONY: all
-all: SlicerWithSlicerRT.manifest SlicerRT Slicer-SuperBuild-Debug Slicer #SlicerWithSlicerRT 
+all: Slicer.manifest
 ifeq ($(SGX),1)
-all: SlicerRT.manifest.sgx SlicerRT.sig 
+all: Slicer.manifest.sgx Slicer.sig 
 endif
 
 ############################## EXECUTABLE ###############################
 # Slicer executable already installed in other location
 
 ################################ MANIFEST ###############################
-SlicerWithSlicerRT.manifest: SlicerRT.manifest.template
+Slicer.manifest: Slicer.manifest.template
 	gramine-manifest \
 		-Dlog_level=$(GRAMINE_LOG_LEVEL) \
 		-Darch_libdir=$(ARCH_LIBDIR) \
@@ -43,32 +40,25 @@ SlicerWithSlicerRT.manifest: SlicerRT.manifest.template
 
 # Make on Ubuntu <= 20.04 doesn't support "Rules with Grouped Targets" (`&:`),
 # see the helloworld example for details on this workaround.
-SlicerRT.sig SlicerRT.manifest.sgx: sgx_outputs
+Slicer.sig Slicer.manifest.sgx: sgx_outputs
 	@:
 
 .INTERMEDIATE: sgx_outputs
-sgx_outputs: SlicerRT.manifest $(SRCDIR)/src/SlicerRT
+sgx_outputs: Slicer.manifest $(SRCDIR)/src/Slicer
 	gramine-sgx-sign \
-		--manifest SlicerRT.manifest \
-		--output SlicerRT.manifest.sgx
+		--manifest Slicer.manifest \
+		--output Slicer.manifest.sgx
 
 
 
 ########################### COPIES OF EXECUTABLES #############################
 # Copy the executable in our working directory, so copy all the Slicer dirs.
 # It is only required the first time or when modifications are made to the content of the root Slicer directories.
-SlicerRT: /home/fitnesslab/Desktop/SlicerRT
-	cp -r $< $@
-
 Slicer: /home/fitnesslab/Desktop/Slicer
 	cp -r $< $@
 
 Slicer-SuperBuild-Debug: /home/fitnesslab/Desktop/Slicer-SuperBuild-Debug
 	cp -r $< $@
-#	cp SlicerRT/build/inner-build/SlicerWithSlicerRT .
-#SlicerWithSlicerRT: SlicerRT/build/inner-build/SlicerWithSlicerRT
-#	cp $< $@  
-
 
 ############################## RUNNING TESTS ##################################
 ifeq ($(SGX),)
@@ -80,6 +70,5 @@ endif
 
 .PHONY: clean
 clean:
-	$(RM) -rf *.token *.sig *.manifest.sgx *.manifest SlicerRT *.rdb  
-#SlicerRT Slicer Slicer-SuperBuild-Debug
+	$(RM) -rf *.token *.sig *.manifest.sgx *.manifest Slicer *.rdb
 
