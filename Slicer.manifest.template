@@ -4,7 +4,7 @@
 loader.entrypoint = "file:{{ gramine.libos }}"
 
 # Entrypoint binary which Gramine invokes.
-libos.entrypoint = "/SlicerRT/build/inner-build/SlicerWithSlicerRT"
+libos.entrypoint = "/Slicer-SuperBuild-Debug/Slicer-build/Slicer"
 
 # Verbosity of Gramine debug log (none/error/warning/debug/trace/all). Note
 # that GRAMINE_LOG_LEVEL macro is expanded in the Makefile as part of the
@@ -44,7 +44,7 @@ fs.mounts = [
 
   # Mount executable (located in the current directory) under the
   # in-Gramine visible root directory.
-  { path = "/SlicerRT", uri = "file:SlicerRT" },
+#  { path = "/SlicerRT", uri = "file:SlicerRT" },
   { path = "/Slicer-SuperBuild-Debug", uri = "file:Slicer-SuperBuild-Debug" },
   { path = "/Slicer", uri = "file:Slicer" },
   { path = "/usr/lib/x86_64-linux-gnu", uri = "file:/usr/lib/x86_64-linux-gnu" },
@@ -103,7 +103,7 @@ sgx.trusted_files = [
   "file:{{ gramine.libos }}",
   "file:Slicer-SuperBuild-Debug",
   "file:Slicer",
-  "file:SlicerRT",  
+#  "file:SlicerRT",  
   "file:/usr/lib/x86_64-linux-gnu",
   "file:{{ gramine.runtimedir() }}/",
 ]
