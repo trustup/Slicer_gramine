@@ -9,8 +9,7 @@
 # directory with arch-specific libraries the below path works for Debian/Ubuntu; 
 # for CentOS/RHEL/Fedora, you should overwrite this default like this: `ARCH_LIBDIR=/lib64 make`
 
-ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)						# directory dove dovrebbero essere le librerie usate dall'app 
-
+ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)						# Host libraries directory to mount in the Gramine filesystem 
 
 ifeq ($(DEBUG),1)
 GRAMINE_LOG_LEVEL = debug
@@ -19,13 +18,14 @@ GRAMINE_LOG_LEVEL = error
 endif
 
 .PHONY: all
-all: Slicer.manifest
+all: Slicer.manifest	# Slicer Slicer-SuperBuild-Debug
 ifeq ($(SGX),1)
 all: Slicer.manifest.sgx Slicer.sig 
 endif
 
 ############################## EXECUTABLE ###############################
-# Slicer executable already installed in other location
+# Slicer executable already installed in other location 
+# TBD: Include commands for building the Slicer executable.
 
 ################################ MANIFEST ###############################
 Slicer.manifest: Slicer.manifest.template
@@ -49,11 +49,10 @@ sgx_outputs: Slicer.manifest $(SRCDIR)/src/Slicer
 		--manifest Slicer.manifest \
 		--output Slicer.manifest.sgx
 
-
-
 ########################### COPIES OF EXECUTABLES #############################
 # Copy the executable in our working directory, so copy all the Slicer dirs.
 # It is only required the first time or when modifications are made to the content of the root Slicer directories.
+# And it is only required if you have not already built the Slicer binary in the same directory as the Makefile and manifest.
 Slicer: /home/fitnesslab/Desktop/Slicer
 	cp -r $< $@
 
